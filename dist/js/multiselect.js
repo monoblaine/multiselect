@@ -33,6 +33,36 @@ if (typeof jQuery === 'undefined') {
 }(function ($) {
     'use strict';
 
+    var searchIcon = '<svg class="svgic svgic-search" role="img" aria-hidden="true" version="1.1" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M15.504 13.616l-3.79-3.223c-0.392-0.353-0.811-0.514-1.149-0.499 0.895-1.048 1.435-2.407 1.435-3.893 0-3.314-2.686-6-6-6s-6 2.686-6 6 2.686 6 6 6c1.486 0 2.845-0.54 3.893-1.435-0.016 0.338 0.146 0.757 0.499 1.149l3.223 3.79c0.552 0.613 1.453 0.665 2.003 0.115s0.498-1.452-0.115-2.003zM6 10c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z"></path></svg>',
+        searchHtml = '<div class="input-group m-b-xs"><span class="input-group-addon">' + searchIcon + '</span><input type="text" class="form-control"></div>',
+        doubleRightIconHtml = '<svg width="16" height="16" class="svgic svgic-si-glyph-triangle-double-arrow-right" role="img" aria-hidden="true" viewBox="0 0 16 16" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g fill="currentColor"><path d="M9.113,15.495 C8.531,16.076 7.01,16.395 7.01,14.494 L7.01,1.506 C7.01,-0.333 8.531,-0.076 9.113,0.506 L15.557,6.948 C16.137,7.529 16.137,8.47 15.557,9.052 L9.113,15.495 L9.113,15.495 Z"></path><path d="M2.113,15.495 C1.531,16.076 0.01,16.395 0.01,14.494 L0.01,1.506 C0.01,-0.333 1.531,-0.076 2.113,0.506 L8.557,6.948 C9.137,7.529 9.137,8.47 8.557,9.052 L2.113,15.495 L2.113,15.495 Z"></path></g></g></svg>',
+        rightIconHtml = '<svg width="17" height="16" class="svgic svgic-si-glyph-triangle-right" role="img" aria-hidden="true" viewBox="0 0 17 16" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><path d="M6.113,15.495 C5.531,16.076 4.01,16.395 4.01,14.494 L4.01,1.506 C4.01,-0.333 5.531,-0.076 6.113,0.506 L12.557,6.948 C13.137,7.529 13.137,8.47 12.557,9.052 L6.113,15.495 L6.113,15.495 Z" fill="currentColor"></path></g></svg>',
+        leftIconHtml = '<svg width="17" height="17" class="svgic svgic-si-glyph-triangle-left" role="img" aria-hidden="true" viewBox="0 0 17 17" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><path d="M3.446,10.052 C2.866,9.471 2.866,8.53 3.446,7.948 L9.89,1.506 C10.471,0.924 11.993,0.667 11.993,2.506 L11.993,15.494 C11.993,17.395 10.472,17.076 9.89,16.495 L3.446,10.052 L3.446,10.052 Z" fill="currentColor"></path></g></svg>',
+        doubleLeftIconHtml = '<svg width="17" height="17" class="svgic svgic-si-glyph-triangle-double-arrow-left" role="img" aria-hidden="true" viewBox="0 0 17 17" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(1.000000, 1.000000)" fill="currentColor"><path d="M0.446,9.052 C-0.134,8.471 -0.134,7.53 0.446,6.948 L6.89,0.506 C7.471,-0.076 8.993,-0.333 8.993,1.506 L8.993,14.494 C8.993,16.395 7.472,16.076 6.89,15.495 L0.446,9.052 L0.446,9.052 Z"></path><path d="M7.446,9.052 C6.866,8.471 6.866,7.53 7.446,6.948 L13.89,0.506 C14.471,-0.076 15.993,-0.333 15.993,1.506 L15.993,14.494 C15.993,16.395 14.472,16.076 13.89,15.495 L7.446,9.052 L7.446,9.052 Z"></path></g></g></svg>',
+        rowHtml = '<div class="MultiSelect-Row">',
+        leftColHtml = '<div class="MultiSelect-Col MultiSelect-Col--left">',
+        middleColHtml = '<div class="MultiSelect-Col MultiSelect-Col--middle">',
+        rightColHtml = '<div class="MultiSelect-Col MultiSelect-Col--right">',
+        closingDivHtml = '</div>',
+        createLabel = function (label, forId) {
+            return '<label for="' + forId + '" class="small text-muted fw-n m-b-0">' + label + '</label>';
+        },
+        createButton = function (title, iconHtml, isAdd) {
+            return $('<button type="button" class="btn btn-block btn-default btn-outline-' + (isAdd ? 'success' : 'danger') + ' btn-svgic" title="' + title + '">' + iconHtml + '</button>');
+        },
+        getOptions = function ($options, useSelected, allIsActuallySelected) {
+            return $(
+                (allIsActuallySelected === true ? $options : $options.filter(useSelected ? ':selected' : ':not(:selected)'))
+                    .map(function () {
+                        var $me = $(this);
+
+                        return '<option value="' + $me.attr('value')  + '">' + $me.text() + '</option>'
+                    })
+                    .get()
+                    .join('')
+            );
+        };
+
     var Multiselect = (function($) {
         /** Multiselect object constructor
          *
@@ -40,14 +70,75 @@ if (typeof jQuery === 'undefined') {
          *  @constructor
         **/
         function Multiselect( $select, settings ) {
-            var id = $select.prop('id');
-            this.$left = $select;
-            this.$right = $( settings.right ).length ? $( settings.right ) : $('#' + id + '_to');
+            var id = $select.prop('id'),
+                labelHtml = $('label[for="' + id + '"]').html(),
+                $emptySelect = $select
+                    .clone()
+                    .empty()
+                    .attr('size', $select.prop('size') || 8)
+                    .removeAttr('name')
+                    .removeAttr('required')
+                    .removeAttr('data-role'),
+                $allOptions = $select.children(),
+                $options = $allOptions.slice(1),
+                allActuallySelected = $allOptions.first().is(':selected'),
+                $leftSelect = $emptySelect.clone().attr('id', id + '_from'),
+                $rightSelect = $emptySelect.clone().attr('id', id + '_to'),
+                $panel = $(
+                    '<div class="panel panel-default MultiSelect">' +
+                        '<div class="panel-heading fw-b">' + labelHtml + closingDivHtml +
+                        '<div class="panel-body">' +
+                            rowHtml +
+                                leftColHtml + closingDivHtml +
+                                middleColHtml + closingDivHtml +
+                                rightColHtml + closingDivHtml +
+                            closingDivHtml +
+                            rowHtml +
+                                leftColHtml + closingDivHtml +
+                                middleColHtml +
+                                    '<div class="MultiSelect-BtnContainer">' + closingDivHtml +
+                                closingDivHtml +
+                                rightColHtml + closingDivHtml +
+                            closingDivHtml +
+                            rowHtml +
+                                leftColHtml +
+                                    createLabel('Seçilebilir öğeler', $leftSelect.prop('id')) +
+                                closingDivHtml +
+                                middleColHtml + closingDivHtml +
+                                rightColHtml +
+                                    createLabel('Seçili öğeler', $rightSelect.prop('id')) +
+                                closingDivHtml +
+                            closingDivHtml +
+                        closingDivHtml +
+                    closingDivHtml
+                ),
+                $rightAll = createButton('Tümünü ekle', doubleRightIconHtml, true),
+                $rightSelected = createButton('Seçili öğeleri ekle', rightIconHtml, true),
+                $leftSelected = createButton('Seçili öğeleri çıkar', leftIconHtml, false),
+                $leftAll = createButton('Tümünü çıkar', doubleLeftIconHtml, false),
+                $selectContainers = $panel
+                    .find('.MultiSelect-Row')
+                    .next()
+                    .children('.MultiSelect-Col--left, .MultiSelect-Col--right');
+
+            $panel.find('.MultiSelect-BtnContainer').append($rightAll, $rightSelected, $leftSelected, $leftAll);
+            $leftSelect.appendTo($selectContainers[0]);
+            $rightSelect.appendTo($selectContainers[1]);
+            getOptions($options, false).appendTo($leftSelect);
+            getOptions($options, true, allActuallySelected).appendTo($rightSelect);
+            $panel.insertBefore($select.closest('.form-group'));
+
+            this.numAll = $options.length;
+            this.numSelected = allActuallySelected ? $options.length : $rightSelect.children().length;
+            this.$select = $select;
+            this.$allOptions = $allOptions;
+            this.$left = $leftSelect;
+            this.$right = $rightSelect;
             this.actions = {
-                $leftAll:       $( settings.leftAll ).length ? $( settings.leftAll ) : $('#' + id + '_leftAll'),
-                $rightAll:      $( settings.rightAll ).length ? $( settings.rightAll ) : $('#' + id + '_rightAll'),
-                $leftSelected:  $( settings.leftSelected ).length ? $( settings.leftSelected ) : $('#' + id + '_leftSelected'),
-                $rightSelected: $( settings.rightSelected ).length ? $( settings.rightSelected ) : $('#' + id + '_rightSelected'),
+                $leftAll:       $leftAll,
+                $rightAll:      $rightAll,
+                $leftSelected:  $leftSelected,
+                $rightSelected: $rightSelected,
 
                 $undo:          $( settings.undo ).length ? $( settings.undo ) : $('#' + id + '_undo'),
                 $redo:          $( settings.redo ).length ? $( settings.redo ) : $('#' + id + '_redo'),
@@ -135,13 +226,13 @@ if (typeof jQuery === 'undefined') {
                 // Append left filter
                 if (self.options.search && self.options.search.left) {
                     self.options.search.$left = $(self.options.search.left);
-                    self.$left.before(self.options.search.$left);
+                    self.options.search.$left.appendTo(self.$left.closest('.MultiSelect-Row').prev().find('.MultiSelect-Col--left'));
                 }
 
                 // Append right filter
                 if (self.options.search && self.options.search.right) {
                     self.options.search.$right = $(self.options.search.right);
-                    self.$right.before($(self.options.search.$right));
+                    self.options.search.$right.appendTo(self.$right.closest('.MultiSelect-Row').prev().find('.MultiSelect-Col--right'));
                 }
 
                 // Initialize events
@@ -156,7 +247,7 @@ if (typeof jQuery === 'undefined') {
 
                 // Attach event to left filter
                 if (self.options.search && self.options.search.$left) {
-                    self.options.search.$left.on('keyup', function(e) {
+                    self.options.search.$left.children('input').on('keyup', function(e) {
                         if (self.callbacks.fireSearch(this.value)) {
                             var $toShow = self.$left.find('option:search("' + this.value + '")').mShow();
                             var $toHide = self.$left.find('option:not(:search("' + this.value + '"))').mHide();
@@ -170,7 +261,7 @@ if (typeof jQuery === 'undefined') {
 
                 // Attach event to right filter
                 if (self.options.search && self.options.search.$right) {
-                    self.options.search.$right.on('keyup', function(e) {
+                    self.options.search.$right.children('input').on('keyup', function(e) {
                         if (self.callbacks.fireSearch(this.value)) {
                             var $toShow = self.$right.find('option:search("' + this.value + '")').mShow();
                             var $toHide = self.$right.find('option:not(:search("' + this.value + '"))').mHide();
@@ -369,7 +460,7 @@ if (typeof jQuery === 'undefined') {
                 }
 
                 if ( typeof self.callbacks.afterMoveToRight == 'function' && !silent ) {
-                    self.callbacks.afterMoveToRight( self.$left, self.$right, $options );
+                    self.callbacks.afterMoveToRight.call( self, self.$left, self.$right, $options );
                 }
 
                 return self;
@@ -400,7 +491,7 @@ if (typeof jQuery === 'undefined') {
                 }
 
                 if ( typeof self.callbacks.afterMoveToLeft == 'function' && !silent ) {
-                    self.callbacks.afterMoveToLeft( self.$left, self.$right, $options );
+                    self.callbacks.afterMoveToLeft.call( self, self.$left, self.$right, $options );
                 }
 
                 return self;
@@ -438,7 +529,7 @@ if (typeof jQuery === 'undefined') {
                             if (self.options.ignoreDisabled) {
                                 disabledSelector = ':not(:disabled)';
                             }
-                            
+
                             $destinationGroup.move($option.find('option' + disabledSelector));
                         } else {
                             $destinationGroup.move($option);
@@ -580,7 +671,21 @@ if (typeof jQuery === 'undefined') {
              *  @attribute $right jQuery object
              *  @attribute $options HTML object (the option[s] which was selected to be moved)
             **/
-            afterMoveToRight: function($left, $right, $options) {},
+            afterMoveToRight: function($left, $right, $options) {
+                var me = this,
+                    $allOptions = me.$allOptions;
+
+                $options.each(function () {
+                    $allOptions.filter('[value="' + $(this).prop('value') + '"]').prop('selected', true);
+                });
+
+                this.numSelected += $options.length;
+
+                if (me.numSelected === me.numAll) {
+                    $allOptions.first().prop('selected', true);
+                    $allOptions.slice(1).prop('selected', false);
+                }
+            },
 
             /** will be executed each time before moving option[s] to left
              *
@@ -605,7 +710,21 @@ if (typeof jQuery === 'undefined') {
              *  @attribute $right jQuery object
              *  @attribute $options HTML object (the option[s] which was selected to be moved)
             **/
-            afterMoveToLeft: function($left, $right, $options) {},
+            afterMoveToLeft: function($left, $right, $options) {
+                var me = this,
+                    $allOptions = me.$allOptions;
+
+                if (me.numSelected === me.numAll) {
+                    $allOptions.first().prop('selected', false);
+                    $allOptions.slice(1).prop('selected', true);
+                }
+
+                $options.each(function () {
+                    $allOptions.filter('[value="' + $(this).prop('value') + '"]').prop('selected', false);
+                });
+
+                me.numSelected -= $options.length;
+            },
 
             /** will be executed each time before moving option[s] up
              *
@@ -680,7 +799,9 @@ if (typeof jQuery === 'undefined') {
             **/
             fireSearch: function(value) {
                 return value.length > 1;
-            }
+            },
+
+            searchEnabled: false
         }
     };
 
@@ -694,6 +815,13 @@ if (typeof jQuery === 'undefined') {
             var $this    = $(this),
                 data     = $this.data('crlcu.multiselect'),
                 settings = $.extend({}, $.multiselect.defaults, $this.data(), (typeof options === 'object' && options));
+
+            if (settings.searchEnabled === true) {
+                settings.search = {
+                    left: searchHtml,
+                    right: searchHtml
+                };
+            }
 
             if (!data) {
                 $this.data('crlcu.multiselect', (data = new Multiselect($this, settings)));
@@ -795,4 +923,6 @@ if (typeof jQuery === 'undefined') {
 
         return $(elem).text().match(regex);
     }
+
+    $(function () { $('[data-role="multiselect"]').multiselect({ sort: false }); });
 }));

@@ -1,0 +1,56 @@
+.MultiSelect {
+    $middle-col-width: 40px;
+    $btn-height: 30px;
+    $btn-spacing: 6px;
+    $btn-col-vertical-gap: 10px;
+
+    + .form-group {
+        display: none;
+    }
+
+    &-Row {
+        @include clearfix;
+        position: relative;
+    }
+
+    &-Col {
+        float: left;
+
+        &--left {
+            width: 50%;
+            padding-right: ($middle-col-width / 2) + $btn-col-vertical-gap;
+        }
+
+        &--middle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: $middle-col-width;
+            height: 100%;
+            margin-left: -$middle-col-width / 2;
+            z-index: 1;
+        }
+
+        &--right {
+            width: 50%;
+            padding-left: ($middle-col-width / 2) + $btn-col-vertical-gap;
+        }
+    }
+
+    &-BtnContainer {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        margin-top: -($btn-height * 4 + $btn-spacing * 3) / 2;
+
+        > .btn {
+            height: $btn-height;
+            margin-bottom: 0;
+
+            + .btn {
+                margin-top: $btn-spacing;
+            }
+        }
+    }
+}
