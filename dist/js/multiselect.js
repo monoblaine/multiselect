@@ -68,14 +68,12 @@ if (typeof jQuery === 'undefined') {
 
             this.options = {
                 keepRenderingSort:  settings.keepRenderingSort,
-                submitAllLeft:      settings.submitAllLeft !== undefined ? settings.submitAllLeft : true,
-                submitAllRight:     settings.submitAllRight !== undefined ? settings.submitAllRight : true,
                 search:             settings.search,
                 ignoreDisabled:     settings.ignoreDisabled !== undefined ? settings.ignoreDisabled : false,
                 matchOptgroupBy:    settings.matchOptgroupBy !== undefined ? settings.matchOptgroupBy : 'label'
             };
 
-            delete settings.keepRenderingSort, settings.submitAllLeft, settings.submitAllRight, settings.search, settings.ignoreDisabled, settings.matchOptgroupBy;
+            delete settings.keepRenderingSort, settings.search, settings.ignoreDisabled, settings.matchOptgroupBy;
 
             this.callbacks = settings;
 
@@ -183,24 +181,6 @@ if (typeof jQuery === 'undefined') {
                         }
                     });
                 }
-
-                // Select all the options from left and right side when submiting the parent form
-                self.$right.closest('form').on('submit', function(e) {
-                    if (self.options.search) {
-                        // Clear left search input
-                        if (self.options.search.$left) {
-                            self.options.search.$left.val('').trigger('keyup');
-                        }
-
-                        // Clear right search input
-                        if (self.options.search.$right) {
-                            self.options.search.$right.val('').trigger('keyup');
-                        }
-                    }
-
-                    self.$left.find('option').prop('selected', self.options.submitAllLeft);
-                    self.$right.find('option').prop('selected', self.options.submitAllRight);
-                });
 
                 // Attach event for double clicking on options from left side
                 self.$left.on('dblclick', 'option', function(e) {
