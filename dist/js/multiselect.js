@@ -48,7 +48,7 @@ if (typeof jQuery === 'undefined') {
             return '<label for="' + forId + '" class="small text-muted fw-n m-b-0">' + label + '</label>';
         },
         createButton = function (title, iconHtml, isAdd) {
-            return $('<button type="button" class="btn btn-block btn-default btn-outline-' + (isAdd ? 'success' : 'danger') + ' btn-svgic" title="' + title + '">' + iconHtml + '</button>');
+            return $('<button type="button" class="btn btn-block btn-outline-' + (isAdd ? 'success' : 'danger') + ' btn-svgic" title="' + title + '">' + iconHtml + '</button>');
         },
         getOptions = function ($options, useSelected, allIsActuallySelected) {
             return $(
