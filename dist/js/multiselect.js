@@ -243,7 +243,7 @@ if (typeof jQuery === 'undefined') {
                 });
 
                 // Attach event for pushing ENTER on options from left side
-                self.$left.on('keypress', function(e) {
+                self.$left.on('keydown', function(e) {
                     if (e.keyCode === 13) {
                         e.preventDefault();
 
