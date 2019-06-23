@@ -203,7 +203,7 @@ if (typeof jQuery === 'undefined') {
                     });
 
                     self.options.search.$left.find('button').click(function () {
-                        $(this).parent().prev().val('').triggerHandler('keyup');
+                        $(this).parent().prev().val('').focus().triggerHandler('keyup');
                     });
                 }
 
@@ -220,7 +220,7 @@ if (typeof jQuery === 'undefined') {
                     });
 
                     self.options.search.$right.find('button').click(function () {
-                        $(this).parent().prev().val('').triggerHandler('keyup');
+                        $(this).parent().prev().val('').focus().triggerHandler('keyup');
                     });
                 }
 
