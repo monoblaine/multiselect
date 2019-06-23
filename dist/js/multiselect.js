@@ -195,10 +195,11 @@ if (typeof jQuery === 'undefined') {
                 if (self.options.search && self.options.search.$left) {
                     self.options.search.$left.children('input').on('keyup', function(e) {
                         if (self.callbacks.fireSearch(this.value)) {
-                            var $toShow = self.$left.find('option:search("' + this.value + '")').mShow();
-                            var $toHide = self.$left.find('option:not(:search("' + this.value + '"))').mHide();
+                            var sluggedVal = this.value.toSlug();
+                            var $toShow = self.$left.find('option:search("' + sluggedVal + '")').mShow();
+                            var $toHide = self.$left.find('option:not(:search("' + sluggedVal + '"))').mHide();
                             var $grpHide = self.$left.find('option').closest('optgroup').mHide();
-                            var $grpShow = self.$left.find('option:not(.hidden)').parent('optgroup').mShow();
+                            var $grpShow = self.$left.find('option:not([hidden])').parent('optgroup').mShow();
                         } else {
                             self.$left.find('option, optgroup').mShow();
                         }
@@ -213,10 +214,11 @@ if (typeof jQuery === 'undefined') {
                 if (self.options.search && self.options.search.$right) {
                     self.options.search.$right.children('input').on('keyup', function(e) {
                         if (self.callbacks.fireSearch(this.value)) {
-                            var $toShow = self.$right.find('option:search("' + this.value + '")').mShow();
-                            var $toHide = self.$right.find('option:not(:search("' + this.value + '"))').mHide();
+                            var sluggedVal = this.value.toSlug();
+                            var $toShow = self.$right.find('option:search("' + sluggedVal + '")').mShow();
+                            var $toHide = self.$right.find('option:not(:search("' + sluggedVal + '"))').mHide();
                             var $grpHide = self.$right.find('option').closest('optgroup').mHide();
-                            var $grpShow = self.$right.find('option:not(.hidden)').parent('optgroup').mShow();
+                            var $grpShow = self.$right.find('option:not([hidden])').parent('optgroup').mShow();
                         } else {
                             self.$right.find('option, optgroup').mShow();
                         }
@@ -231,7 +233,7 @@ if (typeof jQuery === 'undefined') {
                 self.$left.on('dblclick', 'option', function(e) {
                     e.preventDefault();
 
-                    var $options = self.$left.find('option:selected:not(.hidden)');
+                    var $options = self.$left.find('option:selected:not([hidden])');
 
                     if ( $options.length ) {
                         self.moveToRight($options, e);
@@ -252,7 +254,7 @@ if (typeof jQuery === 'undefined') {
                     if (e.keyCode === 13) {
                         e.preventDefault();
 
-                        var $options = self.$left.find('option:selected:not(.hidden)');
+                        var $options = self.$left.find('option:selected:not([hidden])');
 
                         if ( $options.length ) {
                             self.moveToRight($options, e);
@@ -264,7 +266,7 @@ if (typeof jQuery === 'undefined') {
                 self.$right.on('dblclick', 'option', function(e) {
                     e.preventDefault();
 
-                    var $options = self.$right.find('option:selected:not(.hidden)');
+                    var $options = self.$right.find('option:selected:not([hidden])');
 
                     if ( $options.length ) {
                         self.moveToLeft($options, e);
@@ -285,7 +287,7 @@ if (typeof jQuery === 'undefined') {
                     if (e.keyCode === 8 || e.keyCode === 46) {
                         e.preventDefault();
 
-                        var $options = self.$right.find('option:selected:not(.hidden)');
+                        var $options = self.$right.find('option:selected:not([hidden])');
 
                         if ( $options.length ) {
                             self.moveToLeft($options, e);
@@ -307,7 +309,7 @@ if (typeof jQuery === 'undefined') {
                 self.actions.$rightSelected.on('click', function(e) {
                     e.preventDefault();
 
-                    var $options = self.$left.find('option:selected:not(.hidden)');
+                    var $options = self.$left.find('option:selected:not([hidden])');
 
                     if ( $options.length ) {
                         self.moveToRight($options, e);
@@ -319,7 +321,7 @@ if (typeof jQuery === 'undefined') {
                 self.actions.$leftSelected.on('click', function(e) {
                     e.preventDefault();
 
-                    var $options = self.$right.find('option:selected:not(.hidden)');
+                    var $options = self.$right.find('option:selected:not([hidden])');
 
                     if ( $options.length ) {
                         self.moveToLeft($options, e);
@@ -331,7 +333,7 @@ if (typeof jQuery === 'undefined') {
                 self.actions.$rightAll.on('click', function(e) {
                     e.preventDefault();
 
-                    var $options = self.$left.children(':not(span):not(.hidden)');
+                    var $options = self.$left.children(':not([hidden])');
 
                     if ( $options.length ) {
                         self.moveToRight($options, e);
@@ -343,7 +345,7 @@ if (typeof jQuery === 'undefined') {
                 self.actions.$leftAll.on('click', function(e) {
                     e.preventDefault();
 
-                    var $options = self.$right.children(':not(span):not(.hidden)');
+                    var $options = self.$right.children(':not([hidden])');
 
                     if ( $options.length ) {
                         self.moveToLeft($options, e);
@@ -584,7 +586,7 @@ if (typeof jQuery === 'undefined') {
                 data     = $this.data('crlcu.multiselect'),
                 settings = $.extend({}, $.multiselect.defaults, $this.data(), (typeof options === 'object' && options));
 
-            if (settings.searchEnabled === true) {
+            if (settings.searchEnabled === true && !isIE) {
                 settings.search = {
                     left: searchHtml,
                     right: searchHtml
@@ -617,40 +619,11 @@ if (typeof jQuery === 'undefined') {
     };
 
     $.fn.mShow = function() {
-        this.removeClass('hidden').show();
-
-        if (isIE || isSafari) {
-            this.each(function(index, option) {
-                // Remove <span> to make it compatible with IE
-                if($(option).parent().is('span')) {
-                    $(option).parent().replaceWith(option);
-                }
-
-                $(option).show();
-            });
-        }
-        if(isFirefox){
-            this.attr('disabled', false)
-        }
-
-        return this;
+        return this.removeAttr('hidden');
     };
 
     $.fn.mHide = function() {
-        this.addClass('hidden').hide();
-
-        if (isIE || isSafari) {
-            this.each(function(index, option) {
-                // Wrap with <span> to make it compatible with IE
-                if(!$(option).parent().is('span')) {
-                    $(option).wrap('<span>').hide();
-                }
-            });
-        }
-        if(isFirefox){
-            this.attr('disabled', true)
-        }
-        return this;
+        return this.attr('hidden', '');
     };
 
     // attach index to children
@@ -669,9 +642,7 @@ if (typeof jQuery === 'undefined') {
     };
 
     $.expr[":"].search = function(elem, index, meta) {
-        var regex = new RegExp(meta[3].replace(/([^a-zA-Z0-9])/g, "\\$1"), "i");
-
-        return $(elem).text().match(regex);
+        return $(elem).text().toSlug().indexOf(meta[3]) !== -1;
     }
 
     $(function () { $('[data-role="multiselect"]').multiselect(); });
