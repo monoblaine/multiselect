@@ -150,11 +150,10 @@ if (typeof jQuery === 'undefined') {
 
             this.options = {
                 search:             settings.search,
-                ignoreDisabled:     settings.ignoreDisabled !== undefined ? settings.ignoreDisabled : false,
-                matchOptgroupBy:    settings.matchOptgroupBy !== undefined ? settings.matchOptgroupBy : 'label'
+                ignoreDisabled:     settings.ignoreDisabled !== undefined ? settings.ignoreDisabled : false
             };
 
-            delete settings.search, settings.ignoreDisabled, settings.matchOptgroupBy;
+            delete settings.search, settings.ignoreDisabled;
 
             this.callbacks = settings;
 
@@ -198,10 +197,8 @@ if (typeof jQuery === 'undefined') {
                             var sluggedVal = this.value.toSlug();
                             var $toShow = self.$left.find('option:search("' + sluggedVal + '")').mShow();
                             var $toHide = self.$left.find('option:not(:search("' + sluggedVal + '"))').mHide();
-                            var $grpHide = self.$left.find('option').closest('optgroup').mHide();
-                            var $grpShow = self.$left.find('option:not([hidden])').parent('optgroup').mShow();
                         } else {
-                            self.$left.find('option, optgroup').mShow();
+                            self.$left.find('option').mShow();
                         }
                     });
 
@@ -217,10 +214,8 @@ if (typeof jQuery === 'undefined') {
                             var sluggedVal = this.value.toSlug();
                             var $toShow = self.$right.find('option:search("' + sluggedVal + '")').mShow();
                             var $toHide = self.$right.find('option:not(:search("' + sluggedVal + '"))').mHide();
-                            var $grpHide = self.$right.find('option').closest('optgroup').mHide();
-                            var $grpShow = self.$right.find('option:not([hidden])').parent('optgroup').mShow();
                         } else {
-                            self.$right.find('option, optgroup').mShow();
+                            self.$right.find('option').mShow();
                         }
                     });
 
@@ -237,15 +232,6 @@ if (typeof jQuery === 'undefined') {
 
                     if ( $options.length ) {
                         self.moveToRight($options, e);
-                    }
-                });
-
-                // Attach event for clicking on optgroup's from left side
-                self.$left.on('click', 'optgroup', function(e) {
-                    if ($(e.target).prop('tagName') == 'OPTGROUP') {
-                        $(this)
-                            .children()
-                            .prop('selected', true);
                     }
                 });
 
@@ -270,15 +256,6 @@ if (typeof jQuery === 'undefined') {
 
                     if ( $options.length ) {
                         self.moveToLeft($options, e);
-                    }
-                });
-
-                // Attach event for clicking on optgroup's from right side
-                self.$right.on('click', 'optgroup', function(e) {
-                    if ($(e.target).prop('tagName') == 'OPTGROUP') {
-                        $(this)
-                            .children()
-                            .prop('selected', true);
                     }
                 });
 
@@ -406,42 +383,7 @@ if (typeof jQuery === 'undefined') {
                     return self.callbacks.moveFromAtoB(self, $source, $destination, $options, event);
                 }
 
-                $options.each(function(index, option) {
-                    var $option = $(option);
-
-                    if (self.options.ignoreDisabled && $option.is(':disabled')) {
-                        return true;
-                    }
-
-                    if ($option.is('optgroup') || $option.parent().is('optgroup')) {
-                        var $sourceGroup = $option.is('optgroup') ? $option : $option.parent();
-                        var optgroupSelector = 'optgroup[' + self.options.matchOptgroupBy + '="' + $sourceGroup.prop(self.options.matchOptgroupBy) + '"]';
-                        var $destinationGroup = $destination.find(optgroupSelector);
-
-                        if (!$destinationGroup.length) {
-                            $destinationGroup = $sourceGroup.clone(true);
-                            $destinationGroup.empty();
-
-                            $destination.move($destinationGroup);
-                        }
-
-                        if ($option.is('optgroup')) {
-                            var disabledSelector = '';
-
-                            if (self.options.ignoreDisabled) {
-                                disabledSelector = ':not(:disabled)';
-                            }
-
-                            $destinationGroup.move($option.find('option' + disabledSelector));
-                        } else {
-                            $destinationGroup.move($option);
-                        }
-
-                        $sourceGroup.removeIfEmpty();
-                    } else {
-                        $destination.move($option);
-                    }
-                });
+                $destination.move($options);
 
                 return self;
             }
@@ -460,16 +402,7 @@ if (typeof jQuery === 'undefined') {
             **/
             startUp: function( $left, $right ) {
                 $right.find('option').each(function(index, rightOption) {
-                    if ($(rightOption).parent().prop('tagName') == 'OPTGROUP') {
-                        var optgroupSelector = 'optgroup[label="' + $(rightOption).parent().attr('label') + '"]';
-                        $left.find(optgroupSelector + ' option[value="' + rightOption.value + '"]').each(function(index, leftOption) {
-                            leftOption.remove();
-                        });
-                        $left.find(optgroupSelector).removeIfEmpty();
-                    } else {
-                        var $option = $left.find('option[value="' + rightOption.value + '"]');
-                        $option.remove();
-                    }
+                    $left.find('option[value="' + rightOption.value + '"]').remove();
                 });
             },
 
@@ -629,15 +562,7 @@ if (typeof jQuery === 'undefined') {
     // attach index to children
     $.fn.attachIndex = function() {
         this.children().each(function(index, option) {
-            var $option = $(option);
-
-            if ($option.is('optgroup')) {
-                $option.children().each(function(i, children) {
-                    $(children).data('position', i);
-                });
-            }
-
-            $option.data('position', index);
+            $(option).data('position', index);
         });
     };
 
