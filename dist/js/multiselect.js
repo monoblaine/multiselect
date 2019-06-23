@@ -86,7 +86,7 @@ if (typeof jQuery === 'undefined') {
                 $leftSelect = $emptySelect.clone().attr('id', id + '_from'),
                 $rightSelect = $emptySelect.clone().attr('id', id + '_to'),
                 $panel = $(
-                    '<div class="panel panel-default MultiSelect">' +
+                    '<div class="panel panel-default panel-anim MultiSelect">' +
                         '<div class="panel-heading fw-b">' + labelHtml + closingDivHtml +
                         '<div class="panel-body">' +
                             rowHtml +
