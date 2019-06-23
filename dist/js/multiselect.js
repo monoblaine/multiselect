@@ -447,7 +447,8 @@ if (typeof jQuery === 'undefined') {
             **/
             afterMoveToRight: function($left, $right, $options) {
                 var me = this,
-                    $allOptions = me.$allOptions;
+                    $allOptions = me.$allOptions,
+                    nothingWasSelectedBefore = me.numSelected === 0;
 
                 $options.each(function () {
                     $allOptions.filter('[value="' + $(this).prop('value') + '"]').prop('selected', true);
@@ -458,6 +459,11 @@ if (typeof jQuery === 'undefined') {
                 if (me.numSelected === me.numAll) {
                     $allOptions.first().prop('selected', true);
                     $allOptions.slice(1).prop('selected', false);
+                }
+
+                if (nothingWasSelectedBefore && me.isRequired && isIE) {
+                    // I hate you IE
+                    me.$select.removeAttr('required').attr('required', '');
                 }
             },
 
@@ -498,6 +504,11 @@ if (typeof jQuery === 'undefined') {
                 });
 
                 me.numSelected -= $options.length;
+
+                if (me.numSelected === 0 && me.isRequired && isIE) {
+                    // I hate you IE
+                    me.$select.removeAttr('required').attr('required', '');
+                }
             },
 
             /*  will tell if the search can start
