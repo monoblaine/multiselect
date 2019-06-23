@@ -4,8 +4,30 @@
     $btn-spacing: 6px;
     $btn-col-vertical-gap: 10px;
 
-    + .form-group {
-        display: none;
+    margin-bottom: $form-group-margin-bottom;
+
+    &-Org {
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 1px !important;
+        border: 0 none !important;
+        position: relative;
+        opacity: 0 !important;
+        //top: 3em;
+        left: $panel-body-padding;
+
+        + .panel > .panel-footer {
+            display: none;
+        }
+
+        &:invalid:focus + .panel {
+            > .panel-footer {
+                display: block;
+            }
+
+            @include panel-variant($panel-danger-border, $panel-danger-text, $panel-danger-heading-bg, $panel-danger-border);
+            box-shadow: 0 0 .5em $validation-error-color;
+        }
     }
 
     &-Row {

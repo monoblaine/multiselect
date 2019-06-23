@@ -72,7 +72,7 @@ if (typeof jQuery === 'undefined') {
         **/
         function Multiselect( $select, settings ) {
             var id = $select.prop('id'),
-                labelHtml = $('label[for="' + id + '"]').html(),
+                labelHtml = $('label[for="' + id + '"]').remove().html(),
                 $emptySelect = $select
                     .clone()
                     .empty()
@@ -120,15 +120,22 @@ if (typeof jQuery === 'undefined') {
                 $selectContainers = $panel
                     .find('.MultiSelect-Row')
                     .next()
-                    .children('.MultiSelect-Col--left, .MultiSelect-Col--right');
+                    .children('.MultiSelect-Col--left, .MultiSelect-Col--right'),
+                isRequired = $select.prop('required');
 
             $panel.find('.MultiSelect-BtnContainer').append($rightAll, $rightSelected, $leftSelected, $leftAll);
             $leftSelect.appendTo($selectContainers[0]);
             $rightSelect.appendTo($selectContainers[1]);
             getOptions($options, false).appendTo($leftSelect);
             getOptions($options, true, allActuallySelected).appendTo($rightSelect);
-            $panel.insertBefore($select.closest('.form-group'));
 
+            if (isRequired === true) {
+                $('<div class="panel-footer field-validation-error">En az bir öğe seçmeniz gerekiyor.</div>').appendTo($panel);
+            }
+
+            $panel.insertAfter($select.unwrap().addClass('MultiSelect-Org'));
+
+            this.isRequired = isRequired;
             this.numAll = $options.length;
             this.numSelected = allActuallySelected ? $options.length : $rightSelect.children().length;
             this.$select = $select;
