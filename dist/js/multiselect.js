@@ -446,7 +446,7 @@ if (typeof jQuery === 'undefined') {
                     $allOptions.filter('[value="' + $(this).prop('value') + '"]').prop('selected', true);
                 });
 
-                this.numSelected += $options.length;
+                me.numSelected += $options.length;
 
                 if (me.numSelected === me.numAll) {
                     $allOptions.first().prop('selected', true);
