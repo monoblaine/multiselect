@@ -138,13 +138,7 @@ if (typeof jQuery === 'undefined') {
                 $leftAll:       $leftAll,
                 $rightAll:      $rightAll,
                 $leftSelected:  $leftSelected,
-                $rightSelected: $rightSelected,
-
-                $undo:          $( settings.undo ).length ? $( settings.undo ) : $('#' + id + '_undo'),
-                $redo:          $( settings.redo ).length ? $( settings.redo ) : $('#' + id + '_redo'),
-
-                $moveUp:        $( settings.moveUp ).length ? $( settings.moveUp ) : $('#' + id + '_move_up'),
-                $moveDown:      $( settings.moveDown ).length ? $( settings.moveDown ) : $('#' + id + '_move_down')
+                $rightSelected: $rightSelected
             };
 
             delete settings.leftAll;
@@ -152,30 +146,16 @@ if (typeof jQuery === 'undefined') {
             delete settings.right;
             delete settings.rightAll;
             delete settings.rightSelected;
-            delete settings.undo;
-            delete settings.redo;
-            delete settings.moveUp;
-            delete settings.moveDown;
 
             this.options = {
-                keepRenderingSort:  settings.keepRenderingSort,
                 search:             settings.search,
                 ignoreDisabled:     settings.ignoreDisabled !== undefined ? settings.ignoreDisabled : false,
                 matchOptgroupBy:    settings.matchOptgroupBy !== undefined ? settings.matchOptgroupBy : 'label'
             };
 
-            delete settings.keepRenderingSort, settings.search, settings.ignoreDisabled, settings.matchOptgroupBy;
+            delete settings.search, settings.ignoreDisabled, settings.matchOptgroupBy;
 
             this.callbacks = settings;
-
-            if ( typeof this.callbacks.sort == 'function' ) {
-                var sort = this.callbacks.sort;
-
-                this.callbacks.sort = {
-                    left: sort,
-                    right: sort,
-                };
-            }
 
             this.init();
         }
@@ -183,44 +163,9 @@ if (typeof jQuery === 'undefined') {
         Multiselect.prototype = {
             init: function() {
                 var self = this;
-                self.undoStack = [];
-                self.redoStack = [];
-
-                if (self.options.keepRenderingSort) {
-                    self.skipInitSort = true;
-
-                    if (self.callbacks.sort !== false) {
-                        self.callbacks.sort = {
-                            left: function(a, b) {
-                                return $(a).data('position') > $(b).data('position') ? 1 : -1;
-                            },
-                            right: function(a, b) {
-                                return $(a).data('position') > $(b).data('position') ? 1 : -1;
-                            },
-                        };
-                    }
-
-                    self.$left.attachIndex();
-
-                    self.$right.each(function(i, select) {
-                        $(select).attachIndex();
-                    });
-                }
 
                 if ( typeof self.callbacks.startUp == 'function' ) {
                     self.callbacks.startUp( self.$left, self.$right );
-                }
-
-                if ( !self.skipInitSort ) {
-                    if ( typeof self.callbacks.sort.left == 'function' ) {
-                        self.$left.mSort(self.callbacks.sort.left);
-                    }
-
-                    if ( typeof self.callbacks.sort.right == 'function' ) {
-                        self.$right.each(function(i, select) {
-                            $(select).mSort(self.callbacks.sort.right);
-                        });
-                    }
                 }
 
                 // Append left filter
@@ -397,111 +342,57 @@ if (typeof jQuery === 'undefined') {
 
                     $(this).blur();
                 });
-
-                self.actions.$undo.on('click', function(e) {
-                    e.preventDefault();
-
-                    self.undo(e);
-                });
-
-                self.actions.$redo.on('click', function(e) {
-                    e.preventDefault();
-
-                    self.redo(e);
-                });
-
-                self.actions.$moveUp.on('click', function(e) {
-                    e.preventDefault();
-
-                    var $options = self.$right.find(':selected:not(span):not(.hidden)');
-
-                    if ( $options.length ) {
-                        self.moveUp($options, e);
-                    }
-
-                    $(this).blur();
-                });
-
-                self.actions.$moveDown.on('click', function(e) {
-                    e.preventDefault();
-
-                    var $options = self.$right.find(':selected:not(span):not(.hidden)');
-
-                    if ( $options.length ) {
-                        self.moveDown($options, e);
-                    }
-
-                    $(this).blur();
-                });
             },
 
-            moveToRight: function( $options, event, silent, skipStack ) {
+            moveToRight: function( $options, event ) {
                 var self = this;
 
                 if ( typeof self.callbacks.moveToRight == 'function' ) {
-                    return self.callbacks.moveToRight( self, $options, event, silent, skipStack );
+                    return self.callbacks.moveToRight( self, $options, event );
                 }
 
-                if ( typeof self.callbacks.beforeMoveToRight == 'function' && !silent ) {
+                if ( typeof self.callbacks.beforeMoveToRight == 'function' ) {
                     if ( !self.callbacks.beforeMoveToRight( self.$left, self.$right, $options ) ) {
                         return false;
                     }
                 }
 
-                self.moveFromAtoB(self.$left, self.$right, $options, event, silent, skipStack);
+                self.moveFromAtoB(self.$left, self.$right, $options, event);
 
-                if ( !skipStack ) {
-                    self.undoStack.push(['right', $options ]);
-                    self.redoStack = [];
-                }
-
-                if ( typeof self.callbacks.sort.right == 'function' && !silent && !self.doNotSortRight ) {
-                    self.$right.mSort(self.callbacks.sort.right);
-                }
-
-                if ( typeof self.callbacks.afterMoveToRight == 'function' && !silent ) {
+                if ( typeof self.callbacks.afterMoveToRight == 'function' ) {
                     self.callbacks.afterMoveToRight.call( self, self.$left, self.$right, $options );
                 }
 
                 return self;
             },
 
-            moveToLeft: function( $options, event, silent, skipStack ) {
+            moveToLeft: function( $options, event ) {
                 var self = this;
 
                 if ( typeof self.callbacks.moveToLeft == 'function' ) {
-                    return self.callbacks.moveToLeft( self, $options, event, silent, skipStack );
+                    return self.callbacks.moveToLeft( self, $options, event );
                 }
 
-                if ( typeof self.callbacks.beforeMoveToLeft == 'function' && !silent ) {
+                if ( typeof self.callbacks.beforeMoveToLeft == 'function' ) {
                     if ( !self.callbacks.beforeMoveToLeft( self.$left, self.$right, $options ) ) {
                         return false;
                     }
                 }
 
-                self.moveFromAtoB(self.$right, self.$left, $options, event, silent, skipStack);
+                self.moveFromAtoB(self.$right, self.$left, $options, event);
 
-                if ( !skipStack ) {
-                    self.undoStack.push(['left', $options ]);
-                    self.redoStack = [];
-                }
-
-                if ( typeof self.callbacks.sort.left == 'function' && !silent ) {
-                    self.$left.mSort(self.callbacks.sort.left);
-                }
-
-                if ( typeof self.callbacks.afterMoveToLeft == 'function' && !silent ) {
+                if ( typeof self.callbacks.afterMoveToLeft == 'function' ) {
                     self.callbacks.afterMoveToLeft.call( self, self.$left, self.$right, $options );
                 }
 
                 return self;
             },
 
-            moveFromAtoB: function( $source, $destination, $options, event, silent, skipStack ) {
+            moveFromAtoB: function( $source, $destination, $options, event ) {
                 var self = this;
 
                 if ( typeof self.callbacks.moveFromAtoB == 'function' ) {
-                    return self.callbacks.moveFromAtoB(self, $source, $destination, $options, event, silent, skipStack);
+                    return self.callbacks.moveFromAtoB(self, $source, $destination, $options, event);
                 }
 
                 $options.each(function(index, option) {
@@ -542,74 +433,6 @@ if (typeof jQuery === 'undefined') {
                 });
 
                 return self;
-            },
-
-            moveUp: function($options) {
-                var self = this;
-
-                if ( typeof self.callbacks.beforeMoveUp == 'function' ) {
-                    if ( !self.callbacks.beforeMoveUp( $options ) ) {
-                        return false;
-                    }
-                }
-
-                $options.first().prev().before($options);
-
-                if ( typeof self.callbacks.afterMoveUp == 'function' ) {
-                    self.callbacks.afterMoveUp( $options );
-                }
-            },
-
-            moveDown: function($options) {
-                var self = this;
-
-                if ( typeof self.callbacks.beforeMoveDown == 'function' ) {
-                    if ( !self.callbacks.beforeMoveDown( $options ) ) {
-                        return false;
-                    }
-                }
-
-                $options.last().next().after($options);
-
-                if ( typeof self.callbacks.afterMoveDown == 'function' ) {
-                    self.callbacks.afterMoveDown( $options );
-                }
-            },
-
-            undo: function(event) {
-                var self = this;
-                var last = self.undoStack.pop();
-
-                if ( last ) {
-                    self.redoStack.push(last);
-
-                    switch(last[0]) {
-                        case 'left':
-                            self.moveToRight(last[1], event, false, true);
-                            break;
-                        case 'right':
-                            self.moveToLeft(last[1], event, false, true);
-                            break;
-                    }
-                }
-            },
-
-            redo: function(event) {
-                var self = this;
-                var last = self.redoStack.pop();
-
-                if ( last ) {
-                    self.undoStack.push(last);
-
-                    switch(last[0]) {
-                        case 'left':
-                            self.moveToLeft(last[1], event, false, true);
-                            break;
-                        case 'right':
-                            self.moveToRight(last[1], event, false, true);
-                            break;
-                    }
-                }
             }
         }
 
@@ -726,70 +549,6 @@ if (typeof jQuery === 'undefined') {
                 me.numSelected -= $options.length;
             },
 
-            /** will be executed each time before moving option[s] up
-             *
-             *  IMPORTANT : this method must return boolean value
-             *      true    : continue to moveUp method
-             *      false   : stop
-             *
-             *  @method beforeMoveUp
-             *  @attribute $options HTML object (the option[s] which was selected to be moved)
-             *
-             *  @default true
-             *  @return {boolean}
-            **/
-            beforeMoveUp: function($options) { return true; },
-
-            /*  will be executed each time after moving option[s] up
-             *
-             *  @method afterMoveUp
-             *  @attribute $left jQuery object
-             *  @attribute $right jQuery object
-             *  @attribute $options HTML object (the option[s] which was selected to be moved)
-            **/
-            afterMoveUp: function($options) {},
-
-            /** will be executed each time before moving option[s] down
-             *
-             *  IMPORTANT : this method must return boolean value
-             *      true    : continue to moveUp method
-             *      false   : stop
-             *
-             *  @method beforeMoveDown
-             *  @attribute $options HTML object (the option[s] which was selected to be moved)
-             *
-             *  @default true
-             *  @return {boolean}
-            **/
-            beforeMoveDown: function($options) { return true; },
-
-            /*  will be executed each time after moving option[s] down
-             *
-             *  @method afterMoveUp
-             *  @attribute $left jQuery object
-             *  @attribute $right jQuery object
-             *  @attribute $options HTML object (the option[s] which was selected to be moved)
-            **/
-            afterMoveDown: function($options) {},
-
-            /** sort options by option text
-             *
-             *  @method sort
-             *  @attribute a HTML option
-             *  @attribute b HTML option
-             *
-             *  @return 1/-1
-            **/
-            sort: function(a, b) {
-                if (a.innerHTML == 'NA') {
-                    return 1;
-                } else if (b.innerHTML == 'NA') {
-                    return -1;
-                }
-
-                return (a.innerHTML > b.innerHTML) ? 1 : -1;
-            },
-
             /*  will tell if the search can start
              *
              *  @method fireSearch
@@ -885,24 +644,6 @@ if (typeof jQuery === 'undefined') {
         return this;
     };
 
-    // sort options then reappend them to the select
-    $.fn.mSort = function(callback) {
-        this
-            .children()
-            .sort(callback)
-            .appendTo(this);
-
-        this
-            .find('optgroup')
-            .each(function(i, group) {
-                $(group).children()
-                    .sort(callback)
-                    .appendTo(group);
-            })
-
-        return this;
-    };
-
     // attach index to children
     $.fn.attachIndex = function() {
         this.children().each(function(index, option) {
@@ -924,5 +665,5 @@ if (typeof jQuery === 'undefined') {
         return $(elem).text().match(regex);
     }
 
-    $(function () { $('[data-role="multiselect"]').multiselect({ sort: false }); });
+    $(function () { $('[data-role="multiselect"]').multiselect(); });
 }));
