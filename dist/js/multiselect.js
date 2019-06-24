@@ -117,6 +117,13 @@ if (typeof jQuery === 'undefined') {
             $panel.find('.MultiSelect-BtnContainer').append($rightAll, $rightSelected, $leftSelected, $leftAll);
             $leftSelect.appendTo($selectContainers[0]);
             $rightSelect.appendTo($selectContainers[1]);
+
+            if (settings.optionTextAsTitle) {
+                $options.each(function () {
+                    this.title = $(this).text();
+                });
+            }
+
             getOptions($options, false).appendTo($leftSelect);
             getOptions($options, true, allActuallySelected).appendTo($rightSelect);
 
@@ -513,7 +520,9 @@ if (typeof jQuery === 'undefined') {
                 return value.length > 1;
             },
 
-            searchEnabled: false
+            searchEnabled: false,
+
+            optionTextAsTitle: false
         }
     };
 
