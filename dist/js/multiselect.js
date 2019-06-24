@@ -52,16 +52,7 @@ if (typeof jQuery === 'undefined') {
             return $('<button type="button" class="btn btn-block btn-outline-' + (isAdd ? 'success' : 'danger') + ' btn-svgic" title="' + title + '">' + iconHtml + '</button>');
         },
         getOptions = function ($options, useSelected, allIsActuallySelected) {
-            return $(
-                (allIsActuallySelected === true ? $options : $options.filter(useSelected ? ':selected' : ':not(:selected)'))
-                    .map(function () {
-                        var $me = $(this);
-
-                        return '<option value="' + $me.attr('value')  + '">' + $me.text() + '</option>'
-                    })
-                    .get()
-                    .join('')
-            );
+            return (allIsActuallySelected === true ? $options : $options.filter(useSelected ? ':selected' : ':not(:selected)')).clone();
         };
 
     var Multiselect = (function($) {
