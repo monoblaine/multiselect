@@ -46,7 +46,7 @@ if (typeof jQuery === 'undefined') {
         rightColHtml = '<div class="MultiSelect-Col MultiSelect-Col--right">',
         closingDivHtml = '</div>',
         createLabel = function (label, forId) {
-            return '<label for="' + forId + '" class="small text-muted fw-n m-b-0">' + label + '</label>';
+            return '<label for="' + forId + '" class="text-muted fw-n m-b-0 m-t-xs">' + label + '</label>';
         },
         createButton = function (title, iconHtml, isAdd) {
             return $('<button type="button" class="btn btn-block btn-outline-' + (isAdd ? 'success' : 'danger') + ' btn-svgic" title="' + title + '">' + iconHtml + '</button>');
