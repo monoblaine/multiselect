@@ -1,6 +1,6 @@
 {
   "name": "multiselect-two-sides",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "jQuery multiselect plugin with two sides",
   "main": "dist/js/multiselect.min.js",
   "unpkg": "dist/js/multiselect.min.js",
